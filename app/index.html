@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="App">
+
+<head>
+    <meta charset="UTF-8">
+    <title>File upload</title>
+</head>
+
+<body>
+
+    <div ng-controller="MainCtrl">
+        <p><input type="file" ng-file-select="onFileSelect($files)"></p>
+        <p><input type="file" ng-file-select="onFileSelect($files)" multiple accept="image/*"></p>
+        <div class="button" ng-file-select="onFileSelect($files)" data-multiple="true">
+            <h2>Multiple</h2>
+        </div>
+        <div ng-file-drop="onFileSelect($files)" ng-file-drag-over-class="optional-css-class-name-or-function" ng-show="dropSupported">
+            <h2>drop files here</h2>
+        </div>
+        <button ng-click="upload.abort()">Cancel Upload</button>
+    </div>
+
+    <script src="./lib/angular.js"></script>
+    <script src="./lib/angular-file-upload.js"></script>
+    <script>
+        angular.module('App', ['angularFileUpload'])
+
+        .controller('MainCtrl', ['$scope', '$upload', function($scope, $upload) {
+            $scope.onFileSelect = function(files) {
+                $scope.upload = $upload.upload({
+                    method: 'POST',
+                    url: '/services/upload',
+                    file: files,
+                }).then(function(result) {
+                    console.log(result.data);
+                }, function(err) {
+                    console.error(err);
+                }, function(evt) {
+                    console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+                });
+                // access or attach event listeners to the underlying XMLHttpRequest.
+                //.xhr(function(xhr){xhr.upload.addEventListener(...)})
+
+                /* alternative way of uploading, send the file binary with the file's content-type.
+                   Could be used to upload files to CouchDB, imgur, etc... html5 FileReader is needed.
+                   It could also be used to monitor the progress of a normal http post/put request with large data*/
+                // $scope.upload = $upload.http({...})  see 88#issuecomment-31366487 for sample code.
+            };
+        }]);
+    </script>
+</body>
+
+</html>
