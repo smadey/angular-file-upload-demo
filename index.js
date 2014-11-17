@@ -24,7 +24,21 @@ app.get('/', function(req, res) {
 app.post('/services/upload', function(req, res) {
     var files = Array.isArray(req.files.file) ? req.files.file : req.files.file ? [req.files.file] : [];
 
-    res.send(files.map(function(d) { return d.path; }));
+    var paths = files.map(function(d) { return d.path; });
+
+    setTimeout(function() {
+        paths.forEach(function(path) {
+            fs.exists(path, function(isExists) {
+                if(isExists) {
+                    fs.unlink(path, function() {
+                        console.log('Remove file "' + path + '" successfully!');
+                    });
+                }
+            });
+        })
+    }, 10000);
+
+    res.send(paths);
 });
 
 module.exports = app;
